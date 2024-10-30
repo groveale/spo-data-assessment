@@ -222,6 +222,62 @@ function PopulateHTML($totals)
     Write-Output "Dashboard data updated successfully."
 }
 
+function PopulateDataFrame($siteData, $groupsData, $teamsData)
+{
+    ## filter out group connected sites
+    $nonGroupSites = $siteData | Where { $_.'Root Web Template' -ne "Group" }
+
+    $groupConnectedSites = $siteData | Where { $_.'Root Web Template' -eq "Group" } 
+
+
+    ## We apepar to have some group connected team sites that are have a root web template of "Team Site"
+    ## We will attempt to filter these out using the owner property of the site. If the Owner ends in "Owners" then it highly likey a group connected site.
+    $nonGroupSitesReal = $nonGroupSites | Where { !($_.'Root Web Template' -eq "Team Site" -and $_.'Owner Display Name'.EndsWith("Owners")) }
+
+    Write-Host "SPO Sites (non-group) count: $($nonGroupSitesReal.Count)"
+
+    ## non group sites + groups == total sites
+    $nonGroupSitesReal.Count + $groupsData.Count
+    $siteData.Count
+
+    ## teamGroupIds
+    $teamsGroupId = $teamsData.'Team Id'
+
+    ## Create a new data frame with the SiteId, GroupId, DataSource (SPO, Group), Visibility (Public, Private), Last Activity Date, File Count, Active File Count, Teams Connected
+    $dataFrame = @()
+
+    # Iterate through the first list (nonGroupSitesReal)
+    foreach ($site in $nonGroupSitesReal) {
+        $dataFrame += [PSCustomObject]@{
+            SiteId            = $site.'Site Id'
+            GroupId           = [String]::Empty # SiteId is not available in groupsData
+            DataSource        = "SPO"
+            Visibility        = "Private" # Assumed Private but can have the EEEU claim - MGDC required
+            'Last Activity Date' = if ([string]::Empty -eq $site.'Last Activity Date') { "1970-01-01" } else { $site.'Last Activity Date' }
+            'File Count'      = $site.'File Count'
+            'Active File Count' = $site.'Active File Count'
+            'Teams Connected' = $false
+            'Owner Principal Name' = $site.'Owner Principal Name'
+        }
+    }
+
+    # Iterate through the second list (groupsData)
+    foreach ($group in $groupsData) {
+        $dataFrame += [PSCustomObject]@{
+            SiteId            = [String]::Empty  # SiteId is not available in groupsData
+            GroupId           = $group.'Group Id'
+            DataSource        = "Group"
+            Visibility        = $group.'Group Type'
+            'Last Activity Date' = if ([string]::Empty -eq $group.'Last Activity Date') { "1970-01-01" } else { $group.'Last Activity Date' }
+            'File Count'      = if ([string]::Empty -eq $group.'SharePoint Total File Count') { 0 } else { $group.'SharePoint Total File Count' }
+            'Active File Count' = if ([string]::Empty -eq $group.'SharePoint Active File Count') { 0 } else { $group.'SharePoint Active File Count' }
+            'Teams Connected' = $teamsGroupId.Contains($group.'Group Id')
+            'Owner Principal Name' = $group.'Owner Principal Name'
+        }
+    }
+return $dataFrame
+}
+
 ##############################################
 # Main
 ##############################################
@@ -255,57 +311,7 @@ Write-Host "Teams data count: $($teamsData.Count)"
 Write-Host "Groups data count: $($groupsData.Count)" 
 Write-Host "SPO Sites count: $($siteData.Count)"
 
-## filter out group connected sites
-$nonGroupSites = $siteData | Where { $_.'Root Web Template' -ne "Group" }
-
-$groupConnectedSites = $siteData | Where { $_.'Root Web Template' -eq "Group" } 
-
-
-## We apepar to have some group connected team sites that are have a root web template of "Team Site"
-## We will attempt to filter these out using the owner property of the site. If the Owner ends in "Owners" then it highly likey a group connected site.
-$nonGroupSitesReal = $nonGroupSites | Where { !($_.'Root Web Template' -eq "Team Site" -and $_.'Owner Display Name'.EndsWith("Owners")) }
-
-Write-Host "SPO Sites (non-group) count: $($nonGroupSitesReal.Count)"
-
-## non group sites + groups == total sites
-$nonGroupSitesReal.Count + $groupsData.Count
-$siteData.Count
-
-## teamGroupIds
-$teamsGroupId = $teamsData.'Team Id'
-
-## Create a new data frame with the SiteId, GroupId, DataSource (SPO, Group), Visibility (Public, Private), Last Activity Date, File Count, Active File Count, Teams Connected
-$dataFrame = @()
-
-# Iterate through the first list (nonGroupSitesReal)
-foreach ($site in $nonGroupSitesReal) {
-    $dataFrame += [PSCustomObject]@{
-        SiteId            = $site.'Site Id'
-        GroupId           = [String]::Empty # SiteId is not available in groupsData
-        DataSource        = "SPO"
-        Visibility        = "Private" # Assumed Private but can have the EEEU claim - MGDC required
-        'Last Activity Date' = if ([string]::Empty -eq $site.'Last Activity Date') { "1970-01-01" } else { $site.'Last Activity Date' }
-        'File Count'      = $site.'File Count'
-        'Active File Count' = $site.'Active File Count'
-        'Teams Connected' = $false
-        'Owner Principal Name' = $site.'Owner Principal Name'
-    }
-}
-
-# Iterate through the second list (groupsData)
-foreach ($group in $groupsData) {
-    $dataFrame += [PSCustomObject]@{
-        SiteId            = [String]::Empty  # SiteId is not available in groupsData
-        GroupId           = $group.'Group Id'
-        DataSource        = "Group"
-        Visibility        = $group.'Group Type'
-        'Last Activity Date' = if ([string]::Empty -eq $group.'Last Activity Date') { "1970-01-01" } else { $group.'Last Activity Date' }
-        'File Count'      = if ([string]::Empty -eq $group.'SharePoint Total File Count') { 0 } else { $group.'SharePoint Total File Count' }
-        'Active File Count' = if ([string]::Empty -eq $group.'SharePoint Active File Count') { 0 } else { $group.'SharePoint Active File Count' }
-        'Teams Connected' = $teamsGroupId.Contains($group.'Group Id')
-        'Owner Principal Name' = $group.'Owner Principal Name'
-    }
-}
+$dataFrame = PopulateDataFrame $siteData $groupsData $teamsData
 
 ## Write to CSV
 $dataFrame | Export-Csv -Path ".\Output\OpenFilesData.csv" -NoTypeInformation

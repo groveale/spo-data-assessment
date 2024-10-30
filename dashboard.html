@@ -174,7 +174,7 @@
             document.getElementById('spoReductionPercent').textContent = `Reduce organisation-wide accessible sites by ${Math.round((data.inactivePublicSites / data.publicSites) * 100)}%`;
             document.getElementById('spoReductionMessage').textContent = `We identified ${data.inactivePublicSites} sites with organisation-wide access that have had no activity in the last 180 days. Restricting access to these sites would significantly reduce your exposure with minimal business impact.`;
             document.getElementById('fileReductionPercent').textContent = `Reduce organisation-wide file access by ${Math.round(((data.publicFiles - data.activePublicFiles) / data.publicFiles) * 100)}% by converting these inactive public teams and sites to private`;
-            document.getElementById('fileReductionMessage').textContent = `By removing organisation-wide access from inactive sites and implementing proper inheritance patterns, we can reduce widely accessible files from ${formatNumber(data.publicFiles)} to approximately ${formatNumber(data.activePublicFiles)} files.`;
+            document.getElementById('fileReductionMessage').textContent = `By removing organisation-wide access from inactive sites and teams, we can reduce widely accessible files from ${formatNumber(data.publicFiles)} to approximately ${formatNumber(data.activePublicFiles)} files.`;
         }
 
         // Initialize with data if available
