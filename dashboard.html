@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Level Sharing Overview</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <!-- Assuming you'll inject data like this -->
+                                                                    <script>
+        window.dashboardData = {
+            files: 632917,
+            publicSites: 8,
+            publicFiles: 2588,
+            publicTeams: 16,
+            sites: 202,
+            activePublicFiles: 6,
+            teams: 33,
+            activeFiles: 161,
+            inactivePublicSites: 8,
+            inactivePublicTeams: 12
+        };
+    </script>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-6xl mx-auto p-6 space-y-12">
+        <!-- Metrics Dashboard -->
+        <div>
+            <h1 class="text-4xl font-bold mb-8">Site Level Sharing Overview</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <!-- Total Content -->
+                <div class="p-6 border rounded-lg bg-white h-full">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-6xl font-bold text-blue-500" id="totalFiles">632.9K</span>
+                            <span class="text-lg text-blue-500">files</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Total Content</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            Total files across all SharePoint sites and Teams in your tenant.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Organization-Wide Access -->
+                <div class="p-6 border rounded-lg bg-white h-full">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-6xl font-bold text-blue-500" id="publicFiles">2.5K</span>
+                            <span class="text-lg text-blue-500">files</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Organization-Wide Access</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            Files accessible to all users in your organisation. Note: This number may be higher due to broken inheritance patterns not captured in this scan.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Total Sites -->
+                <div class="p-6 border rounded-lg bg-white h-full">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-6xl font-bold text-blue-500" id="totalSites">235</span>
+                            <span class="text-lg text-blue-500">sites</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Total Sites</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            Total SharePoint sites in your tenant, with <span id="publicSites">24</span> sites allowing organisation-wide access.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Total Teams -->
+                <div class="p-6 border rounded-lg bg-white h-full">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-6xl font-bold text-blue-500" id="totalTeams">33</span>
+                            <span class="text-lg text-blue-500">teams</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Total Teams</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            Microsoft Teams workspaces, including <span id="publicTeams">16</span> teams with organisation-wide access.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations Section -->
+        <div>
+            <h2 class="text-3xl font-bold mb-6">Recommended Actions</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <!-- Inactive Public Sites -->
+                <div class="p-6 border rounded-lg bg-white">
+                    <div class="flex flex-col gap-4">
+                        <h3 class="text-xl font-bold text-gray-900">Inactive Public Sites</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-4xl font-bold text-green-600" id="publicSiteReduction">18</span>
+                            <svg class="text-green-600 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                            <span class="text-lg text-green-600">reduction possible</span>
+                        </div>
+                        <p class="text-gray-600 text-sm" id="spoReductionPercent">Reduce organisation-wide accessible sites by 75%</p>
+                        <p class="text-gray-600 text-sm leading-relaxed" id="spoReductionMessage">
+                            We identified 18 sites with organisation-wide access that have had no activity in the last 180 days. Restricting access to these sites would significantly reduce your exposure with minimal business impact.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Organization-Wide File Access -->
+                <div class="p-6 border rounded-lg bg-white">
+                    <div class="flex flex-col gap-4">
+                        <h3 class="text-xl font-bold text-gray-900">Organisation-Wide File Access</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-4xl font-bold text-green-600" id="orgWideFileReduction" >1.8K</span>
+                            <svg class="text-green-600 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                            <span class="text-lg text-green-600">reduction possible</span>
+                        </div>
+                        <p class="text-gray-600 text-sm" id="fileReductionPercent">Reduce organisation-wide file access by 70% through automated permission updates</p>
+                        <p class="text-gray-600 text-sm leading-relaxed" id="fileReductionMessage">
+                            By removing organisation-wide access from inactive sites and implementing proper inheritance patterns, we can reduce widely accessible files from 2.5K to approximately 700 files.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Teams Access Review -->
+                <div class="p-6 border rounded-lg bg-white">
+                    <div class="flex flex-col gap-4">
+                        <h3 class="text-xl font-bold text-gray-900">Teams Access Review</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-4xl font-bold text-green-600" id="teamAccessReview">12</span>
+                            <svg class="text-green-600 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                            <span class="text-lg text-green-600">reduction possible</span>
+                        </div>
+                        <p class="text-gray-600 text-sm" id="teamsReductionPercent">Reduce teams with organisation-wide access by 75%</p>
+                        <p class="text-gray-600 text-sm leading-relaxed" id="teamsReductionMessage">
+                            12 teams with organisation-wide access show no collaboration patterns in the past 180 days. Consider restricting access to specific groups for these teams.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple formatter function for numbers
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return `${(num / 1000000).toFixed(1)}M`;
+            }
+            if (num >= 1000) {
+                return `${(num / 1000).toFixed(1)}K`;
+            }
+            return num;
+        }
+
+        // Update the dashboard with actual data
+        function updateDashboard(data) {
+            document.getElementById('totalFiles').textContent = formatNumber(data.files);
+            document.getElementById('publicFiles').textContent = formatNumber(data.publicFiles);
+            document.getElementById('totalSites').textContent = data.sites;
+            document.getElementById('publicSites').textContent = data.publicSites;
+            document.getElementById('totalTeams').textContent = data.teams;
+            document.getElementById('publicTeams').textContent = data.publicTeams;
+            document.getElementById('orgWideFileReduction').textContent = formatNumber(data.publicFiles - data.activePublicFiles);
+            document.getElementById('teamAccessReview').textContent = data.inactivePublicTeams;
+            document.getElementById('teamsReductionPercent').textContent = `Reduce teams with organisation-wide access by ${Math.round((data.inactivePublicTeams / data.publicTeams) * 100)}%`;
+            document.getElementById('teamsReductionMessage').textContent = `${data.inactivePublicTeams} teams with organisation-wide access show no collaboration patterns in the past 180 days. Consider restricting access to specific groups for these teams.`;
+            document.getElementById('publicSiteReduction').textContent = data.inactivePublicSites;
+            document.getElementById('spoReductionPercent').textContent = `Reduce organisation-wide accessible sites by ${Math.round((data.inactivePublicSites / data.publicSites) * 100)}%`;
+            document.getElementById('spoReductionMessage').textContent = `We identified ${data.inactivePublicSites} sites with organisation-wide access that have had no activity in the last 180 days. Restricting access to these sites would significantly reduce your exposure with minimal business impact.`;
+            document.getElementById('fileReductionPercent').textContent = `Reduce organisation-wide file access by ${Math.round(((data.publicFiles - data.activePublicFiles) / data.publicFiles) * 100)}% by converting these inactive public teams and sites to private`;
+            document.getElementById('fileReductionMessage').textContent = `By removing organisation-wide access from inactive sites and implementing proper inheritance patterns, we can reduce widely accessible files from ${formatNumber(data.publicFiles)} to approximately ${formatNumber(data.activePublicFiles)} files.`;
+        }
+
+        // Initialize with data if available
+        if (window.dashboardData) {
+            updateDashboard(window.dashboardData);
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

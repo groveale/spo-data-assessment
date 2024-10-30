@@ -43,7 +43,11 @@ $today = Get-Date
 
 $tempDataDir = ".\Temp"
 
+# Define the path to the HTML file
+$htmlFilePath = "dashboard.html"
 
+# Sites and Teams will be considered inactive if they have not been active in the last 180 days
+$inactiveDays = 180
 
 ##############################################
 # Functions
@@ -148,20 +152,33 @@ function CalcualteTotals($data)
         activeFiles = 0
         publicFiles = 0
         activePublicFiles = 0
+        inactivePublicSites = 0
+        inactivePublicTeams = 0
     }
 
     # Iterate through each row and update the counters
     foreach ($row in $data) {
-        $totals.sites++
-        if ($row.Visibility -eq "Public") {
-            $totals.publicSites++
-        }
         if ($row."Teams Connected" -eq "True") {
             $totals.teams++
             if ($row.Visibility -eq "Public") {
                 $totals.publicTeams++
+                if (([datetime]$row.'Last Activity Date' -lt (Get-Date).AddDays(-$inactiveDays))) {
+                    $totals.inactivePublicTeams++
+                }
+            }
+            
+        }
+        else 
+        {
+            $totals.sites++
+            if ($row.Visibility -eq "Public") {
+                $totals.publicSites++
+                if ([datetime]$row.'Last Activity Date' -lt (Get-Date).AddDays(-$inactiveDays)) {
+                    $totals.inactivePublicSites++
+                }
             }
         }
+        
         $totals.files += [int]$row."File Count"
         $totals.activeFiles += [int]$row."Active File Count"
         if ($row.Visibility -eq "Public") {
@@ -171,6 +188,38 @@ function CalcualteTotals($data)
     }
 
     return $totals
+}
+
+function PopulateHTML($totals)
+{
+    # Read the content of the HTML file
+    $htmlContent = Get-Content -Path $htmlFilePath -Raw
+
+    # Define the new data for dashboardData
+    $newDashboardData = @"
+    <script>
+        window.dashboardData = {
+            files: $($totals.files),
+            publicSites: $($totals.publicSites),
+            publicFiles: $($totals.publicFiles),
+            publicTeams: $($totals.publicTeams),
+            sites: $($totals.sites),
+            activePublicFiles: $($totals.activePublicFiles),
+            teams: $($totals.teams),
+            activeFiles: $($totals.activeFiles),
+            inactivePublicSites: $($totals.inactivePublicSites),
+            inactivePublicTeams: $($totals.inactivePublicTeams)
+        };
+    </script>
+"@
+
+    # Use a regular expression to replace the existing dashboardData script block
+    $updatedHtmlContent = [regex]::Replace($htmlContent, '<script>\s*window\.dashboardData\s*=\s*\{[^}]+\};\s*</script>', $newDashboardData)
+
+    # Write the updated content back to the HTML file
+    Set-Content -Path $htmlFilePath -Value $updatedHtmlContent
+
+    Write-Output "Dashboard data updated successfully."
 }
 
 ##############################################
@@ -235,7 +284,7 @@ foreach ($site in $nonGroupSitesReal) {
         GroupId           = [String]::Empty # SiteId is not available in groupsData
         DataSource        = "SPO"
         Visibility        = "Private" # Assumed Private but can have the EEEU claim - MGDC required
-        'Last Activity Date' = $site.'Last Activity Date'
+        'Last Activity Date' = if ([string]::Empty -eq $site.'Last Activity Date') { "1970-01-01" } else { $site.'Last Activity Date' }
         'File Count'      = $site.'File Count'
         'Active File Count' = $site.'Active File Count'
         'Teams Connected' = $false
@@ -250,7 +299,7 @@ foreach ($group in $groupsData) {
         GroupId           = $group.'Group Id'
         DataSource        = "Group"
         Visibility        = $group.'Group Type'
-        'Last Activity Date' = $group.'Last Activity Date'
+        'Last Activity Date' = if ([string]::Empty -eq $group.'Last Activity Date') { "1970-01-01" } else { $group.'Last Activity Date' }
         'File Count'      = if ([string]::Empty -eq $group.'SharePoint Total File Count') { 0 } else { $group.'SharePoint Total File Count' }
         'Active File Count' = if ([string]::Empty -eq $group.'SharePoint Active File Count') { 0 } else { $group.'SharePoint Active File Count' }
         'Teams Connected' = $teamsGroupId.Contains($group.'Group Id')
@@ -264,6 +313,15 @@ $dataFrame | Export-Csv -Path ".\Output\OpenFilesData.csv" -NoTypeInformation
 ## Calculate totals
 $totals = CalcualteTotals($dataFrame)
 
-# Convert the hashtable to JSON and output it
-$totals_json = $totals | ConvertTo-Json -Depth 3
-Write-Output $totals_json
+## Populate HTML
+PopulateHTML($totals)
+
+$totals
+
+## Launch HTML
+Start-Process -FilePath $htmlFilePath
+
+##############################################
+# End
+
+
