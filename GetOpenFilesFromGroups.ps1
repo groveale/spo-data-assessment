@@ -20,14 +20,13 @@
 
 ## Load the required modules
 
-# try {
-#     Import-Module Microsoft.Graph.Reports
-#     Import-Module Microsoft.Graph.Sites
-# }
-# catch {
-#     Write-Error "Error importing modules required modules - $($Error[0].Exception.Message))"
-#     Exit
-# }
+try {
+    Import-Module Microsoft.Graph.Reports
+}
+catch {
+    Write-Error "Error importing modules required modules - $($Error[0].Exception.Message))"
+    Exit
+}
 
 
 
@@ -154,6 +153,7 @@ function CalcualteTotals($data)
         activePublicFiles = 0
         inactivePublicSites = 0
         inactivePublicTeams = 0
+        inactivePublicFiles = 0
     }
 
     # Iterate through each row and update the counters
@@ -164,6 +164,7 @@ function CalcualteTotals($data)
                 $totals.publicTeams++
                 if (([datetime]$row.'Last Activity Date' -lt (Get-Date).AddDays(-$inactiveDays))) {
                     $totals.inactivePublicTeams++
+                    $totals.inactivePublicFiles += [int]$row."File Count"
                 }
             }
             
@@ -175,6 +176,7 @@ function CalcualteTotals($data)
                 $totals.publicSites++
                 if ([datetime]$row.'Last Activity Date' -lt (Get-Date).AddDays(-$inactiveDays)) {
                     $totals.inactivePublicSites++
+                    $totals.inactivePublicFiles += [int]$row."File Count"
                 }
             }
         }
@@ -208,7 +210,8 @@ function PopulateHTML($totals)
             teams: $($totals.teams),
             activeFiles: $($totals.activeFiles),
             inactivePublicSites: $($totals.inactivePublicSites),
-            inactivePublicTeams: $($totals.inactivePublicTeams)
+            inactivePublicTeams: $($totals.inactivePublicTeams),
+            inactivePublicFiles: $($totals.inactivePublicFiles)
         };
     </script>
 "@
@@ -237,8 +240,8 @@ function PopulateDataFrame($siteData, $groupsData, $teamsData)
     Write-Host "SPO Sites (non-group) count: $($nonGroupSitesReal.Count)"
 
     ## non group sites + groups == total sites
-    $nonGroupSitesReal.Count + $groupsData.Count
-    $siteData.Count
+    # $nonGroupSitesReal.Count + $groupsData.Count
+    # $siteData.Count
 
     ## teamGroupIds
     $teamsGroupId = $teamsData.'Team Id'
