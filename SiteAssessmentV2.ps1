@@ -4,7 +4,7 @@
 #              Group + Teams + SPO data can give us a public vs private file count across SPO.
 #              Also possible to provide active vs inactive breakdown.
 #
-#              Auth required: Application permission - Reports.Read.All
+#              Auth required: Application permission - Reports.Read.All, Drive.Read.All
 #
 # Usage:       .\GetOpenFilesFromGroups.ps1
 #
@@ -22,6 +22,7 @@
 
 try {
     Import-Module Microsoft.Graph.Beta.Reports
+    Import-Module Microsoft.Graph.Files
 }
 catch {
     Write-Error "Error importing modules required modules - $($Error[0].Exception.Message))"
@@ -46,7 +47,7 @@ $tempDataDir = ".\Temp"
 $htmlFilePath = "dashboard.html"
 
 # Sites and Teams will be considered inactive if they have not been active in the last 180 days
-$inactiveDays = 180
+$inactiveDays = 365
 
 ##############################################
 # Functions
@@ -139,7 +140,7 @@ function GetGroupVisibiliy($groupId, $teamsData)
     return $teamsData | Where { $_.'Group Id' -eq $groupId } | Select -ExpandProperty "Group Type"
 }
 
-function CalcualteTotals($data)
+function CalcualteTotals($data, $siteData)
 {
     # Initialize counters
     $totals = @{
@@ -154,6 +155,10 @@ function CalcualteTotals($data)
         inactivePublicSites = 0
         inactivePublicTeams = 0
         inactivePublicFiles = 0
+        orgWideLinks = $siteData.'Company Link Count' | Measure-Object -Sum | Select -ExpandProperty "Sum"
+        anonLinks = $siteData.'Anonymous Link Count' | Measure-Object -Sum | Select -ExpandProperty "Sum"
+        specificLinks = $siteData.'Secure Link For Member Count' | Measure-Object -Sum | Select -ExpandProperty "Sum"
+        inactiveDays = $inactiveDays
     }
 
     # Iterate through each row and update the counters
@@ -211,7 +216,11 @@ function PopulateHTML($totals)
             activeFiles: $($totals.activeFiles),
             inactivePublicSites: $($totals.inactivePublicSites),
             inactivePublicTeams: $($totals.inactivePublicTeams),
-            inactivePublicFiles: $($totals.inactivePublicFiles)
+            inactivePublicFiles: $($totals.inactivePublicFiles),
+            orgWideLinks: $($totals.orgWideLinks),
+            anonLinks: $($totals.anonLinks),
+            specificLinks: $($totals.specificLinks),
+            daysInactive: $($totals.inactiveDays)
         };
     </script>
 "@
@@ -227,6 +236,22 @@ function PopulateHTML($totals)
 
 function PopulateDataFrame($siteData, $groupsData, $teamsData)
 {
+
+    # Initialize an empty hashtable
+    $siteDataHashtable = @{}
+
+    # Iterate over each item in $siteData
+    # foreach ($site in $siteData) {
+    #     # Assuming the site ID is stored in a property called 'SiteID'
+    #     $siteID = $site.'Site Id'
+
+    #     # Add a new property to the object called 'Group Id' and set it to the value returned by GetGroupIdFromSiteId
+    #     $site | Add-Member -MemberType NoteProperty -Name "Group Id" -Value (GetGroupIdFromSiteId $siteID)
+
+    #     # Add the item to the hashtable using the site ID as the key
+    #     $siteDataHashtable[$siteID] = $site
+    # }
+
     ## filter out group connected sites
     $nonGroupSites = $siteData | Where { $_.'Root Web Template' -ne "Group" }
 
@@ -253,7 +278,7 @@ function PopulateDataFrame($siteData, $groupsData, $teamsData)
     foreach ($site in $nonGroupSitesReal) {
         $dataFrame += [PSCustomObject]@{
             SiteId            = $site.'Site Id'
-            GroupId           = [String]::Empty # SiteId is not available in groupsData
+            GroupId           = [string]::Empty
             DataSource        = "SPO"
             Visibility        = "Private" # Assumed Private but can have the EEEU claim - MGDC required
             'Last Activity Date' = if ([string]::Empty -eq $site.'Last Activity Date') { "1970-01-01" } else { $site.'Last Activity Date' }
@@ -261,13 +286,20 @@ function PopulateDataFrame($siteData, $groupsData, $teamsData)
             'Active File Count' = $site.'Active File Count'
             'Teams Connected' = $false
             'Owner Principal Name' = $site.'Owner Principal Name'
+            'Org Wide Link Count' = $site.'Company Link Count'
+            'Specific People Link Count' = $site.'Secure Link For Member Count'
+            'Anonymous Link Count' = $site.'Anonymous Link Count'
+            'Group Members Count' = 0
         }
     }
 
     # Iterate through the second list (groupsData)
     foreach ($group in $groupsData) {
+
+        #$siteId = $groupSites | Where { $_.'Group Id' -eq $group.'Group Id' } | Select -ExpandProperty "Site Id"
+
         $dataFrame += [PSCustomObject]@{
-            SiteId            = [String]::Empty  # SiteId is not available in groupsData
+            SiteId            = [string]::Empty
             GroupId           = $group.'Group Id'
             DataSource        = "Group"
             Visibility        = $group.'Group Type'
@@ -276,9 +308,13 @@ function PopulateDataFrame($siteData, $groupsData, $teamsData)
             'Active File Count' = if ([string]::Empty -eq $group.'SharePoint Active File Count') { 0 } else { $group.'SharePoint Active File Count' }
             'Teams Connected' = $teamsGroupId.Contains($group.'Group Id')
             'Owner Principal Name' = $group.'Owner Principal Name'
+            'Org Wide Link Count' = [string]::Empty
+            'Specific People Link Count' = [string]::Empty
+            'Anonymous Link Count' = [string]::Empty
+            'Group Members Count' = $group.'Member Count'
         }
     }
-return $dataFrame
+    return $dataFrame
 }
 
 ##############################################
@@ -320,7 +356,7 @@ $dataFrame = PopulateDataFrame $siteData $groupsData $teamsData
 $dataFrame | Export-Csv -Path ".\Output\OpenFilesData.csv" -NoTypeInformation
 
 ## Calculate totals
-$totals = CalcualteTotals($dataFrame)
+$totals = CalcualteTotals -data $dataFrame -siteData $siteData
 
 ## Populate HTML
 PopulateHTML($totals)

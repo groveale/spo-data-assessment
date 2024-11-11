@@ -5,19 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Site Level Sharing Overview</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-                                        <script>
+                                                                                                                            <script>
         window.dashboardData = {
-            files: 632917,
+            files: 633072,
             publicSites: 8,
-            publicFiles: 2588,
+            publicFiles: 2618,
             publicTeams: 16,
             sites: 202,
             activePublicFiles: 6,
             teams: 33,
             activeFiles: 161,
-            inactivePublicSites: 8,
-            inactivePublicTeams: 12,
-            inactivePublicFiles: 2345
+            inactivePublicSites: 7,
+            inactivePublicTeams: 8,
+            inactivePublicFiles: 2293,
+            orgWideLinks: 0,
+            anonLinks: 0,
+            specificLinks: 2,
+            daysInactive: 365
         };
     </script>
 </head>
@@ -69,6 +73,20 @@
                     </div>
                 </div>
 
+                <!-- Total Public Sites -->
+                <div class="p-6 border rounded-lg bg-white h-full">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-6xl font-bold text-blue-500" id="publicSitesTotal">16</span>
+                            <span class="text-lg text-blue-500">sites</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Total Public Sites</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            Sites with organisation-wide access. <span id="activePublicSites">3</span> are active
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Total Teams -->
                 <div class="p-6 border rounded-lg bg-white h-full">
                     <div class="flex flex-col gap-2">
@@ -78,7 +96,21 @@
                         </div>
                         <h3 class="text-xl font-bold text-gray-900">Total Teams</h3>
                         <p class="text-gray-600 text-sm leading-relaxed">
-                            Microsoft Teams workspaces, including <span id="publicTeams">16</span> teams with organisation-wide access.
+                            Total Teams in your tenant, with <span id="publicTeams">24</span> sites allowing organisation-wide access.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Total Public Teams -->
+                <div class="p-6 border rounded-lg bg-white h-full">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-6xl font-bold text-blue-500" id="publicTeamsTotal">33</span>
+                            <span class="text-lg text-blue-500">teams</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Total Public Teams</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            Microsoft Teams workspaces with organisation-wide access. <span id="activePublicTeams">16</span> are active
                         </p>
                     </div>
                 </div>
@@ -107,10 +139,10 @@
                     </div>
                 </div>
 
-                <!-- Teams Access Review -->
+                <!-- Inactive Public Teams -->
                 <div class="p-6 border rounded-lg bg-white">
                     <div class="flex flex-col gap-4">
-                        <h3 class="text-xl font-bold text-gray-900">Teams Access Review</h3>
+                        <h3 class="text-xl font-bold text-gray-900">Inactive Public Teams</h3>
                         <div class="flex items-center gap-2">
                             <span class="text-4xl font-bold text-green-600" id="teamAccessReview">12</span>
                             <svg class="text-green-600 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,6 +156,25 @@
                         </p>
                     </div>
                 </div>
+
+            <!-- RCD -->
+            <div class="p-6 border rounded-lg bg-white">
+                <div class="flex flex-col gap-4">
+                    <h3 class="text-xl font-bold text-gray-900">Restrict Public Sites Discoverability</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="text-4xl font-bold text-green-600" id="siteRCDCount">12</span>
+                        <svg class="text-green-600 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                        </svg>
+                        <span class="text-lg text-green-600">reduction possible</span>
+                    </div>
+                    <p class="text-gray-600 text-sm" id="rcdReductionPercent">Reduce active public site discoverability completely</p>
+                    <p class="text-gray-600 text-sm leading-relaxed" id="rcdReductionMessage">
+                        12 sites with organisation-wide access are active. Consider restricting content discoversibility for these sites using RCD
+                    </p>
+                </div>
+            </div>
+
             </div>
         </div>
     
@@ -148,6 +199,25 @@
                         </p>
                     </div>
                 </div>
+
+                <!-- Organization-Wide Public discoverability -->
+                <div class="p-6 border rounded-lg bg-white">
+                    <div class="flex flex-col gap-4">
+                        <h3 class="text-xl font-bold text-gray-900">Organisation-Wide File Discoverability</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-4xl font-bold text-green-600" id="orgWideSiteDiscoverabilityReduction">1.8K</span>
+                            <svg class="text-green-600 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                            <span class="text-lg text-green-600">reduction possible</span>
+                        </div>
+                        <p class="text-gray-600 text-sm" id="activeOrgWideDiscoverabilityPercent">Reduce organisation-wide file discoverability on active public sites by 100%</p>
+                        <p class="text-gray-600 text-sm leading-relaxed" id="activeOrgWideDiscoverabilityMessage">
+                            By using restricted content discoverability (RCD) we can prevent .
+                        </p>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -170,17 +240,27 @@
             document.getElementById('publicFiles').textContent = formatNumber(data.publicFiles);
             document.getElementById('totalSites').textContent = data.sites;
             document.getElementById('publicSites').textContent = data.publicSites;
+            document.getElementById('publicSitesTotal').textContent = data.publicSites;
+            document.getElementById('activePublicSites').textContent = data.publicSites - data.inactivePublicSites;
             document.getElementById('totalTeams').textContent = data.teams;
             document.getElementById('publicTeams').textContent = data.publicTeams;
-            document.getElementById('orgWideFileReduction').textContent = formatNumber(data.publicFiles - data.activePublicFiles);
+            document.getElementById('publicTeamsTotal').textContent = data.publicTeams;
+            document.getElementById('activePublicTeams').textContent = data.publicTeams - data.inactivePublicTeams;
+            document.getElementById('orgWideFileReduction').textContent = formatNumber(data.inactivePublicFiles);
             document.getElementById('teamAccessReview').textContent = data.inactivePublicTeams;
             document.getElementById('teamsReductionPercent').textContent = `Reduce teams with organisation-wide access by ${Math.round((data.inactivePublicTeams / data.publicTeams) * 100)}%`;
-            document.getElementById('teamsReductionMessage').textContent = `${data.inactivePublicTeams} teams with organisation-wide access show no collaboration patterns in the past 180 days. Consider restricting access to specific groups for these teams.`;
+            document.getElementById('teamsReductionMessage').textContent = `${data.inactivePublicTeams} teams with organisation-wide access show no collaboration patterns in the past ${formatNumber(data.daysInactive)} days. Consider restricting access to specific groups for these teams.`;
             document.getElementById('publicSiteReduction').textContent = data.inactivePublicSites;
             document.getElementById('spoReductionPercent').textContent = `Reduce organisation-wide accessible sites by ${Math.round((data.inactivePublicSites / data.publicSites) * 100)}%`;
-            document.getElementById('spoReductionMessage').textContent = `We identified ${data.inactivePublicSites} sites with organisation-wide access that have had no activity in the last 180 days. Restricting access to these sites would significantly reduce your exposure with minimal business impact.`;
-            document.getElementById('fileReductionPercent').textContent = `Reduce organisation-wide file access by ${Math.round((1 - (data.inactivePublicFiles / data.publicFiles)) * 100)}% by converting these inactive public teams and sites to private`;
+            document.getElementById('spoReductionMessage').textContent = `We identified ${data.inactivePublicSites} sites with organisation-wide access that have had no activity in the last ${formatNumber(data.daysInactive)} days. Restricting access to these sites would significantly reduce your exposure with minimal business impact.`;
+            document.getElementById('fileReductionPercent').textContent = `Reduce organisation-wide file access by ${Math.round(((data.inactivePublicFiles / data.publicFiles)) * 100)}% by converting these inactive public teams and sites to private`;
             document.getElementById('fileReductionMessage').textContent = `By removing organisation-wide access from inactive sites and teams, we can reduce widely accessible files from ${formatNumber(data.publicFiles)} to approximately ${formatNumber(data.publicFiles - data.inactivePublicFiles)} files.`;
+            document.getElementById('siteRCDCount').textContent = (data.publicTeams - data.inactivePublicTeams) + (data.publicSites - data.inactivePublicSites);
+            document.getElementById('rcdReductionPercent').textContent = `Reduce active public site discoverability completely`;
+            document.getElementById('rcdReductionMessage').textContent = `${(data.publicTeams - data.inactivePublicTeams) + (data.publicSites - data.inactivePublicSites)} sites with organisation-wide access are active. Consider restricting content discoverability for these sites using RCD`;
+            document.getElementById('orgWideFileReduction').textContent = formatNumber(data.inactivePublicFiles);
+            document.getElementById('orgWideSiteDiscoverabilityReduction').textContent = formatNumber(data.publicFiles - data.inactivePublicFiles);
+            document.getElementById('activeOrgWideDiscoverabilityMessage').textContent = `By using restricted content discoverability (RCD) we can prevent ${formatNumber(data.publicFiles - data.inactivePublicFiles)} files from being discovered using Copilot without changing permissions.`;
         }
 
         // Initialize with data if available
@@ -190,6 +270,27 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
