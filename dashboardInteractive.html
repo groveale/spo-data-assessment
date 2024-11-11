@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; }
+    
+    .dashboard { max-width: 1200px; margin: 0 auto; }
+    
+    .grid { 
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .metric {
+      font-size: 2.5em;
+      color: #2563eb;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    .label {
+      font-size: 1.2em;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .description {
+      color: #666;
+      font-size: 0.9em;
+    }
+    
+    .reduction {
+      color: #059669;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    
+    .reduction-value {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+    
+    .modal-content {
+      position: relative;
+      background: white;
+      margin: 50px auto;
+      padding: 20px;
+      max-width: 800px;
+      border-radius: 8px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .close {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+    
+    .modal-title {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+    }
+    
+    .section-title {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin: 30px 0 20px 0;
+    }
+
+    .unit {
+      font-size: 0.4em;
+      color: #666;
+      margin-left: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <h1 class="section-title">Site Level Sharing Overview</h1>
+    <div class="grid">
+      <div class="card" onclick="showModal('totalContent')">
+        <div class="metric">633.1K <span class="unit">files</span></div>
+        <div class="label">Total Content</div>
+        <div class="description">Total files across all SharePoint sites and Teams in your tenant.</div>
+      </div>
+      
+      <div class="card" onclick="showModal('orgAccess')">
+        <div class="metric">2.6K <span class="unit">files</span></div>
+        <div class="label">Organisation-Wide Access</div>
+        <div class="description">Files accessible to all users in your organisation.</div>
+      </div>
+      
+      <div class="card" onclick="showModal('totalSites')">
+        <div class="metric">202 <span class="unit">sites</span></div>
+        <div class="label">Total Sites</div>
+        <div class="description">Total SharePoint sites in your tenant, with 8 sites allowing organisation-wide access.</div>
+      </div>
+      
+      <div class="card" onclick="showModal('totalTeams')">
+        <div class="metric">33 <span class="unit">teams</span></div>
+        <div class="label">Total Teams</div>
+        <div class="description">Microsoft Teams workspaces, including 16 teams with organisation-wide access.</div>
+      </div>
+    </div>
+
+    <h2 class="section-title">Recommended Actions</h2>
+    <div class="grid">
+      <div class="card" onclick="showModal('inactiveSites')">
+        <div class="label">Inactive Public Sites</div>
+        <div class="reduction">
+          <span class="reduction-value">8</span>
+          <span>↓ reduction possible</span>
+        </div>
+        <div class="description">Reduce organisation-wide accessible sites by 100%</div>
+      </div>
+      
+      <div class="card" onclick="showModal('teamsAccess')">
+        <div class="label">Teams Access Review</div>
+        <div class="reduction">
+          <span class="reduction-value">12</span>
+          <span>↓ reduction possible</span>
+        </div>
+        <div class="description">Reduce teams with organisation-wide access by 75%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2 id="modalTitle" class="modal-title"></h2>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // Sample data - replace with your CSV data
+    const siteData = [{
+      SiteId: "025ec5d6-b946-4545-ab28-9473cac8cd28",
+      GroupId: "",
+      DataSource: "SPO",
+      Visibility: "Private",
+      LastActivityDate: "2023-09-20",
+      FileCount: "11",
+      ActiveFileCount: "0",
+      TeamsConnected: "False",
+      OwnerPrincipalName: "alex@groverale.onmicrosoft.com"
+    }];
+
+    function showModal(type) {
+      const modal = document.getElementById('modal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalContent = document.getElementById('modalContent');
+      
+      let content = '';
+      
+      switch(type) {
+        case 'totalContent':
+          modalTitle.textContent = 'Total Content Details';
+          content = generateTable(['Site ID', 'File Count', 'Active Files', 'Last Activity'], 
+            siteData.map(site => [
+              site.SiteId.substring(0, 8) + '...',
+              site.FileCount,
+              site.ActiveFileCount,
+              site.LastActivityDate
+            ])
+          );
+          break;
+        case 'orgAccess':
+          modalTitle.textContent = 'Organisation-Wide Access Details';
+          content = generateTable(['Site ID', 'Visibility', 'Owner', 'Last Activity'], 
+            siteData.map(site => [
+              site.SiteId.substring(0, 8) + '...',
+              site.Visibility,
+              site.OwnerPrincipalName,
+              site.LastActivityDate
+            ])
+          );
+          break;
+        // Add cases for other metrics...
+      }
+      
+      modalContent.innerHTML = content;
+      modal.style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+    }
+
+    function generateTable(headers, rows) {
+      return `
+        <table>
+          <thead>
+            <tr>
+              ${headers.map(h => `<th>${h}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(row => `
+              <tr>
+                ${row.map(cell => `<td>${cell}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('modal');
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
