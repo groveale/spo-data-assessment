@@ -322,7 +322,7 @@ function PopulateDataFrame($siteData, $groupsData, $teamsData)
 ##############################################
 
 ## Auth
-#ConnectToMSGraph
+ConnectToMSGraph
 
 ## Create temp dir
 if (-not (Test-Path $tempDataDir))
@@ -331,18 +331,14 @@ if (-not (Test-Path $tempDataDir))
 }
 
 ## Get Report data
-# GetSPOReportData
-# GetTeamsReportData
-# GetGroupsReportData
+GetSPOReportData
+GetTeamsReportData
+GetGroupsReportData
 
 ## Read and transform data
-# $siteData = Import-Csv "$tempDataDir\$($today.ToString("yyyy-MM-dd"))-SiteUsageDetail.csv"
-# $teamsData = Import-Csv "$tempDataDir\$($today.ToString("yyyy-MM-dd"))-TeamsDetail.csv"
-# $groupsData = Import-Csv "$tempDataDir\$($today.ToString("yyyy-MM-dd"))-GroupDetail.csv"
-
-$siteData = Import-Csv "$tempDataDir\SharePoint.csv"
-$teamsData = Import-Csv "$tempDataDir\Teams.csv"
-$groupsData = Import-Csv "$tempDataDir\Groups.csv"
+$siteData = Import-Csv "$tempDataDir\$($today.ToString("yyyy-MM-dd"))-SiteUsageDetail.csv"
+$teamsData = Import-Csv "$tempDataDir\$($today.ToString("yyyy-MM-dd"))-TeamsDetail.csv"
+$groupsData = Import-Csv "$tempDataDir\$($today.ToString("yyyy-MM-dd"))-GroupDetail.csv"
 
 ## remove any deleted rows
 $siteData = $siteData | Where { $_.'Is Deleted' -eq $false }
